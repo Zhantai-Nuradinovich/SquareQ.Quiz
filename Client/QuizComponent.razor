@@ -1,0 +1,189 @@
+﻿@using SquareQ.Quiz.Models
+@using SquareQ.Quiz.Services
+@using SquareQ.Quiz.Models
+
+@inject IQuizService QuizService
+
+<div class="my-quiz-container" style="min-height: 400px;">
+    <div id="quiz">
+        <div class="container-fluid">
+            <div id="quiz-stats" class="row text-center">
+                <div class="col-xs-3">
+                    <i class="fa fa-bar-chart"></i>
+                </div>
+                @if (IsQuizStarted)
+                {
+                    <div class="col-xs-3 col-lg-2">
+                        <p>Вопрос</p>
+                        <span class="animated">@curentQuestion/@Quiz.Items?.Count</span>
+                    </div>
+                }
+                <div class="col-xs-3 col-lg-2 animated">
+                    <p>@Quiz?.Name</p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row" style="justify-content: center;">
+                <div class="col-xs-12 col-md-10 col-md-offset-1 text-center">
+                    @if (!IsStartButtonClicked)
+                    {
+                        <div id="quiz-options">
+                            @if (Quiz.Items != null && Quiz.Items.Count != 0)
+                            {
+                                <Animation Effect="@Effect.ZoomInDown"
+                                           Speed="@Speed.Fast"
+                                           Delay="@Delay.None"
+                                           IterationCount="1">
+                                    <button class="btn quiz-ans-btn animated pulse" @onclick="StartQuiz">Начать</button>
+                                </Animation>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        @if (IsQuizStarted)
+                        {
+                            <p id="quiz-question" class="animated">
+                                <Animation Effect="@Effect.ZoomIn" Speed="@Speed.Fast" Delay="@Delay.None" Enabled="IsAnimated" IterationCount="1" OnAnimationEnd="AnimationEnd">
+                                    @QuizItem?.Question
+                                    @if (!string.IsNullOrEmpty(QuizItem?.PicturePath))
+                                    {
+                                        if (!IsTimeIsUp)
+                                        {
+                                            <img src="@QuizItem?.PicturePath" style="height: 400px; width: 400px" />
+                                        }
+                                        if (QuizItem.QuestionType == "Photo")
+                                        {
+                                            //Нужно добавить свойство для вопроса для указания времени задержки
+                                            //Добавить типы в перечисления и вариант с вводом текста
+                                            Task.Delay(10000).ContinueWith(t => { IsTimeIsUp = true; StateHasChanged(); });
+                                        }
+                                    }
+                                </Animation>
+                            </p>
+                            <div id="quiz-options">
+                                <div id="quiz-options">
+                                    <Animation Effect="@Effect.SlideInDown"
+                                               Speed="@Speed.Fast"
+                                               Delay="@Delay.None"
+                                               Enabled="IsAnimated"
+                                               IterationCount="1"
+                                               OnAnimationEnd="AnimationEnd">
+                                        @foreach (var variant in QuizItem?.Answers.Split("1NZN1"))
+                                        {
+                                            @if (QuizItem.QuestionType == "Photo")
+                                            {
+                                                if (IsTimeIsUp)
+                                                {
+                                                    <button class="btn quiz-ans-btn animated"
+                                                            @onclick="(e) => { NextQuestion(variant); RunAnimation(); }">
+                                                        <img src="@variant" style="height: 300px; width: 300px" />
+                                                    </button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <button class="btn quiz-ans-btn animated"
+                                                        @onclick="(e) => { NextQuestion(variant); RunAnimation(); }">
+                                                    @variant
+                                                </button>
+                                            }
+                                        }
+                                    </Animation>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div id="quiz-options">
+                                <Animation Effect="@Effect.ZoomInDown"
+                                           Speed="@Speed.Fast"
+                                           Delay="@Delay.None"
+                                           IterationCount="1">
+                                    <button class="btn quiz-ans-btn animated pulse">Результат @TotalScore %</button>
+                                </Animation>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Quiz Quiz { get; set; }
+
+    public List<QuizItem> UserQuizItems { get; set; } = new List<QuizItem>();
+    public QuizItem QuizItem { get; set; }
+    IEnumerator<QuizItem> Enumerator { get; set; }
+
+    bool IsQuizStarted { get; set; } = false;
+    bool IsStartButtonClicked { get; set; } = false;
+    bool IsTimeIsUp { get; set; } = false;
+    bool IsAnimated { get; set; } = true;
+
+    double TotalScore { get; set; } = 0;
+    int curentQuestion { get; set; } = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Quiz.Items = await QuizService.GetQuizItemsAsync(Quiz.ModuleId, Quiz.QuizId);
+    }
+
+    private void RunAnimation()
+    {
+        IsAnimated = true;
+    }
+
+    private void AnimationEnd()
+    {
+        IsAnimated = false;
+    }
+
+    public void CheckResults()
+    {
+        foreach (var question in Quiz.Items)
+        {
+            if (question.RightAnswer == UserQuizItems.Find(x => x.QuizItemId == question.QuizItemId).RightAnswer)
+            {
+                TotalScore++;
+            }
+        }
+
+
+        TotalScore = TotalScore / UserQuizItems.Count * 100;
+    }
+
+    public void StartQuiz()
+    {
+        IsQuizStarted = true;
+        IsStartButtonClicked = true;
+        Enumerator = Quiz.Items.GetEnumerator();
+        if (Enumerator.MoveNext())
+        {
+            QuizItem = Enumerator.Current;
+        }
+    }
+
+    public void NextQuestion(string variant)
+    {
+        QuizItem.RightAnswer = variant;
+        UserQuizItems.Add(QuizItem);
+        if (Enumerator.MoveNext())
+        {
+            QuizItem = Enumerator.Current;
+            curentQuestion++;
+        }
+        else
+        {
+            CheckResults();
+            IsQuizStarted = false;
+            QuizItem = null;
+        }
+
+        StateHasChanged();
+    }
+}

@@ -1,0 +1,187 @@
+﻿@using Oqtane.Modules.Controls
+@using SquareQ.Quiz.Services
+@using SquareQ.Quiz.Models
+
+@inherits ModuleBase
+@inject IQuizService QuizService
+@inject NavigationManager NavigationManager
+
+<h4>Add a new question</h4>
+
+@if (_item != null)
+{
+    <table class="table table-borderless">
+        <tr>
+            <td>
+                <Label For="question" HelpText="Enter a question">Question: </Label>
+            </td>
+            <td>
+                <input id="question" class="form-control" @bind="@_item.Question" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="picture" HelpText="Enter a path for picture">Picture Path: </Label>
+            </td>
+            <td>
+                <input id="picture" class="form-control" @bind="@_item.PicturePath" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="answ" HelpText="Enter answers">Answers: </Label>
+            </td>
+            <td>
+                <input id="answ" class="form-control" @bind="@_item.Answers" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="rightansw" HelpText="Enter right answer">Right answer: </Label>
+            </td>
+            <td>
+                <input id="rightansw" class="form-control" @bind="@_item.RightAnswer" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="qtype" HelpText="Enter question type">Question type: </Label>
+            </td>
+            <td>
+                <input id="qtype" class="form-control" @bind="@_item.QuestionType" />
+            </td>
+        </tr>
+    </table>
+}
+
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<button type="button" class="btn btn-success" @onclick="AddNew">Add New</button>
+<button type="button" class="btn btn-success" @onclick="Next">Next</button>
+<br />
+<br />
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Actions => "Add,Edit";
+
+    public override string Title => "Manage QuizItem";
+
+    List<QuizItem> _quizItems;
+
+    QuizItem _item;
+    IEnumerator<QuizItem> enumerator;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetItems();
+    }
+
+    private async Task GetItems()
+    {
+        try
+        {
+            _quizItems = await QuizService.GetQuizItemsAsync(ModuleState.ModuleId, Id);
+
+            if (_quizItems == null)
+            {
+                _quizItems = new List<QuizItem>();
+                _item = new QuizItem()
+                {
+                    ModuleId = ModuleState.ModuleId,
+                    QuizID = Id,
+                    Answers = "",
+                    PicturePath = "",
+                    Question = "",
+                    QuestionType = "",
+                    RightAnswer = ""
+                };
+
+                _quizItems.Add(_item);
+            }
+
+            enumerator = _quizItems.GetEnumerator();
+
+            if (enumerator.MoveNext())
+                _item = enumerator.Current;
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading QuizItems {QuizId} {Error}", Id, ex.Message);
+            AddModuleMessage("Error Loading QuizItems", MessageType.Error);
+        }
+    }
+
+    private async Task AddNew()
+    {
+        try
+        {
+            _item = await QuizService.AddQuestionAsync(_item);
+            await logger.LogInformation("QuizItem Added {_item}", _item);
+
+            await GetItems();
+            //NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Adding QuizItem {Error}", ex.Message);
+            AddModuleMessage("Error Adding QuizItem", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            QuizItem QuizItem = await QuizService.GetQuestionAsync(_item.QuizItemId, ModuleState.ModuleId);
+            QuizItem.Question = _item.Question;
+            QuizItem.QuestionType = _item.QuestionType;
+            QuizItem.PicturePath = _item.PicturePath;
+            QuizItem.Answers = _item.Answers;
+            QuizItem.RightAnswer = _item.RightAnswer;
+            QuizItem.QuizID = Id;
+            QuizItem.ModuleId = ModuleState.ModuleId;
+
+            await QuizService.UpdateQuestionAsync(QuizItem);
+            await logger.LogInformation("QuizItem Updated {QuizItem}", QuizItem);
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving QuizItem {Error}", ex.Message);
+            AddModuleMessage("Error Saving QuizItem", MessageType.Error);
+        }
+    }
+
+    private async Task Next()
+    {
+        try
+        {
+            if (enumerator.MoveNext())
+            {
+                _item = enumerator.Current;
+            }
+            else
+            {
+                _item = new QuizItem()
+                {
+                    ModuleId = ModuleState.ModuleId,
+                    QuizID = Id,
+                    Answers = "",
+                    PicturePath = "",
+                    Question = "",
+                    QuestionType = "",
+                    RightAnswer = ""
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Enumerating QuizItem {Error}", ex.Message);
+            AddModuleMessage("Error Enumerating QuizItem", MessageType.Error);
+        }
+    }
+}

@@ -1,0 +1,80 @@
+@using SquareQ.Quiz.Services
+@using SquareQ.Quiz.Models
+
+@namespace SquareQ.Quiz
+@inherits ModuleBase
+@inject IQuizService QuizService
+@inject NavigationManager NavigationManager
+
+@if (_Quizs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ActionLink Action="Add" Security="SecurityAccessLevel.Edit" Text="Add Quiz" />
+    <br />
+    <br />
+    @if (@_Quizs.Count != 0)
+    {
+        <Pager Items="@_Quizs" PageSize="1">
+            <Header>
+                <th style="width: 1px;">&nbsp;</th>
+                <th style="width: 1px;">&nbsp;</th>
+                <th>Quiz</th>
+            </Header>
+            <Row>
+                <td><ActionLink Action="Edit" Parameters="@($"id=" + context.QuizId.ToString())" /></td>
+                <td><ActionDialog Header="Delete Quiz" Message="@("Are You Sure You Wish To Delete The " + context.Name + " Quiz?")" Action="Delete" Security="SecurityAccessLevel.Edit" Class="btn btn-danger" OnClick="@(async () => await Delete(context))" /></td>
+                <td>
+                    <SquareQ.Quiz.Client.QuizComponent Quiz="context" />
+                </td>
+            </Row>
+        </Pager>
+    }
+    else
+    {
+        <p>No Quizzes To Display</p>
+    }
+}
+
+@code {
+    public override List<Resource> Resources => new List<Resource>()
+    {
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" },
+        new Resource { ResourceType = ResourceType.Script, Url = ModulePath() + "Module.js" }
+       // new Resource { ResourceType = ResourceType.Stylesheet, Url = "_content/BlazorAnimation/" + "animate.css" },
+       // new Resource { ResourceType = ResourceType.Script, Url = "_content/BlazorAnimation/" + "blazorAnimationInterop.js" }
+    };
+
+    List<Quiz> _Quizs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _Quizs = await QuizService.GetQuizzesAsync(ModuleState.ModuleId);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Quiz {Error}", ex.Message);
+            AddModuleMessage("Error Loading Quiz", MessageType.Error);
+        }
+    }
+
+    private async Task Delete(Quiz Quiz)
+    {
+        try
+        {
+            await QuizService.DeleteQuizAsync(Quiz.QuizId, ModuleState.ModuleId);
+            await logger.LogInformation("Quiz Deleted {Quiz}", Quiz);
+            _Quizs = await QuizService.GetQuizzesAsync(ModuleState.ModuleId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Quiz {Quiz} {Error}", Quiz, ex.Message);
+            AddModuleMessage("Error Deleting Quiz", MessageType.Error);
+        }
+    }
+}

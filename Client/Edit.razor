@@ -1,0 +1,137 @@
+@using Oqtane.Modules.Controls
+@using SquareQ.Quiz.Services
+@using SquareQ.Quiz.Models
+
+@namespace SquareQ.Quiz
+@inherits ModuleBase
+@inject IQuizService QuizService
+@inject NavigationManager NavigationManager
+
+<table class="table table-borderless">
+    <tr>
+        <td>
+            <Label For="name" HelpText="Enter a name">Name: </Label>
+        </td>
+        <td>
+            <input id="name" class="form-control" @bind="@_name" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="quiztype" HelpText="Enter a type">Type: </Label>
+        </td>
+        <td>
+            <input id="quiztype" class="form-control" @bind="@_quiztype" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="description" HelpText="Enter a description">Description: </Label>
+        </td>
+        <td>
+            <input id="description" class="form-control" @bind="@_description" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <Label For="quiz" HelpText="Edit questions">Questions: </Label>
+        </td>
+        <td>
+        </td>
+    </tr>
+</table>
+<button type="button" class="btn btn-success" @onclick="Save">Save</button>
+<NavLink class="btn btn-secondary" href="@NavigateUrl()">Cancel</NavLink>
+<br />
+<br />
+
+@if (_id > 0)
+{
+    <SquareQ.Quiz.Client.EditQuestions Id="@_id" />
+}
+
+@if (PageState.Action == "Edit")
+{
+    <AuditInfo CreatedBy="@_createdby" CreatedOn="@_createdon" ModifiedBy="@_modifiedby" ModifiedOn="@_modifiedon"></AuditInfo>
+}
+
+@code {
+    public override SecurityAccessLevel SecurityAccessLevel => SecurityAccessLevel.Edit;
+
+    public override string Actions => "Add,Edit";
+
+    public override string Title => "Manage Quiz";
+
+    public override List<Resource> Resources => new List<Resource>()
+{
+        new Resource { ResourceType = ResourceType.Stylesheet, Url = ModulePath() + "Module.css" }
+    };
+
+    int _id;
+    string _name;
+    string _quiztype;
+    string _description;
+    string _createdby;
+    DateTime _createdon;
+    string _modifiedby;
+    DateTime _modifiedon;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (PageState.Action == "Edit")
+            {
+                _id = Int32.Parse(PageState.QueryString["id"]);
+                Quiz Quiz = await QuizService.GetQuizAsync(_id, ModuleState.ModuleId);
+                if (Quiz != null)
+                {
+                    _name = Quiz.Name;
+                    _quiztype = Quiz.QuizType;
+                    _description = Quiz.Description;
+                    _createdby = Quiz.CreatedBy;
+                    _createdon = Quiz.CreatedOn;
+                    _modifiedby = Quiz.ModifiedBy;
+                    _modifiedon = Quiz.ModifiedOn;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Quiz {QuizId} {Error}", _id, ex.Message);
+            AddModuleMessage("Error Loading Quiz", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            if (PageState.Action == "Add")
+            {
+                Quiz Quiz = new Quiz();
+                Quiz.ModuleId = ModuleState.ModuleId;
+                Quiz.Name = _name;
+                Quiz.QuizType = _quiztype;
+                Quiz.Description = _description;
+                Quiz = await QuizService.AddQuizAsync(Quiz);
+                await logger.LogInformation("Quiz Added {Quiz}", Quiz);
+            }
+            else
+            {
+                Quiz Quiz = await QuizService.GetQuizAsync(_id, ModuleState.ModuleId);
+                Quiz.Name = _name;
+                Quiz.QuizType = _quiztype;
+                Quiz.Description = _description;
+                await QuizService.UpdateQuizAsync(Quiz);
+                await logger.LogInformation("Quiz Updated {Quiz}", Quiz);
+            }
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving Quiz {Error}", ex.Message);
+            AddModuleMessage("Error Saving Quiz", MessageType.Error);
+        }
+    }
+}
