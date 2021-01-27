@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace SquareQ.Quiz.Models
 {
     [Table("SquareQQuizItem")]
-    public class QuizItem
+    public class QuizItem //rename to question
     {
         public int QuizItemId { get; set; }
         public int ModuleId { get; set; }
@@ -20,16 +20,4 @@ namespace SquareQ.Quiz.Models
         public int QuizID { get; set; }
         public Quiz Quiz { get; set; }
     }
-
-    //public enum QuizItemType
-    //{
-    //    Usual,
-    //    WithTime,
-    //    InputText,
-    //    InputTextWithPicture,
-    //    InputTextWithTime,
-    //    WithPicture,
-    //    WithPictureAndTime,
-    //    WithPictures
-    //}
 }
