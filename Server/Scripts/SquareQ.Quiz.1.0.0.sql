@@ -6,7 +6,6 @@ CREATE TABLE [dbo].[SquareQQuiz](
 	[QuizId] [int] IDENTITY(1,1) NOT NULL,
 	[ModuleId] [int] NOT NULL,
 	[Name] [nvarchar](256) NOT NULL,
-	[QuizType] [nvarchar](256) NOT NULL,
 	[Description] [nvarchar](256) NOT NULL,
 	[CreatedBy] [nvarchar](256) NOT NULL,
 	[CreatedOn] [datetime] NOT NULL,
@@ -19,18 +18,28 @@ CREATE TABLE [dbo].[SquareQQuiz](
 )
 GO
 
-CREATE TABLE [dbo].[SquareQQuizItem](
-	[QuizItemId] [int] IDENTITY(1,1) NOT NULL,
-	[ModuleId] [int] NOT NULL,
+CREATE TABLE [dbo].[SquareQQuestion](
+	[QuestionId] [int] IDENTITY(1,1) NOT NULL,
 	[QuizID] [int] NOT NULL,
-	[Question] [nvarchar](256) NOT NULL,
-	[PicturePath] [nvarchar](256) NOT NULL,
-	[Answers] [nvarchar](256) NOT NULL,
+	[Text] [nvarchar](256) NOT NULL,
 	[RightAnswer] [nvarchar](256) NOT NULL,
 	[QuestionType] [nvarchar](256) NOT NULL,
-  CONSTRAINT [PK_SquareQQuizItem] PRIMARY KEY CLUSTERED 
+	[SecondsForPicture] [int] NOT NULL,
+  CONSTRAINT [PK_SquareQQuestion] PRIMARY KEY CLUSTERED 
   (
-	[QuizItemId] ASC
+	[QuestionId] ASC
+  )
+)
+GO
+
+CREATE TABLE [dbo].[SquareQAnswer](
+	[AnswerId] [int] IDENTITY(1,1) NOT NULL,
+	[QuestionID] [int] NOT NULL,
+	[Text] [nvarchar](256) NOT NULL,
+	[IsCorrect] [bit] DEFAULT 0 NOT NULL,
+  CONSTRAINT [PK_SquareQQuestionType] PRIMARY KEY CLUSTERED 
+  (
+	[AnswerId] ASC
   )
 )
 GO
@@ -43,12 +52,12 @@ REFERENCES [dbo].Module ([ModuleId])
 ON DELETE CASCADE
 GO
 
-ALTER TABLE [dbo].[SquareQQuizItem] WITH CHECK ADD CONSTRAINT [FK_SquareQQuizItem_Quiz] FOREIGN KEY([QuizID])
+ALTER TABLE [dbo].[SquareQQuestion] WITH CHECK ADD CONSTRAINT [FK_SquareQQuestion_Quiz] FOREIGN KEY([QuizID])
 REFERENCES [dbo].SquareQQuiz ([QuizId])
 ON DELETE CASCADE
 GO
 
-ALTER TABLE [dbo].[SquareQQuizItem] WITH CHECK ADD CONSTRAINT [FK_SquareQQuizItem_Module] FOREIGN KEY([ModuleId])
-REFERENCES [dbo].Module ([ModuleId])
+ALTER TABLE [dbo].[SquareQAnswer] WITH CHECK ADD CONSTRAINT [FK_SquareQAnswer_Question] FOREIGN KEY([QuestionID])
+REFERENCES [dbo].SquareQQuestion ([QuestionId])
 ON DELETE NO ACTION
 GO

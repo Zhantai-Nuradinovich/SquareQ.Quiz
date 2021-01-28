@@ -1,12 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using SquareQ.Quiz.Models;
 
-namespace SquareQ.Quiz.Client.Services.Interfaces
+namespace SquareQ.Quiz.Services
 {
-    interface IQuestionService
+    public interface IQuestionService
     {
+        Task<List<Question>> GetQuestionsAsync(int QuizID);
+
+        Task<Question> GetQuestionAsync(int QuestionId);
+
+        Task<Question> AddQuestionAsync(Question Question);
+
+        Task<Question> UpdateQuestionAsync(Question Question);
+
+        Task DeleteQuestionAsync(int QuestionId);
     }
 }

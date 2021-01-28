@@ -14,12 +14,12 @@ namespace SquareQ.Quiz.Controllers
     public class QuizController : Controller
     {
         private readonly IQuizRepository _QuizRepository;
-        private readonly IQuizItemRepository _QuizItemRepository;
+        private readonly IQuestionRepository _QuizItemRepository;
         private readonly ILogManager _logger;
         protected int _entityId = -1;
 
         public QuizController(
-            IQuizRepository QuizRepository, IQuizItemRepository QuizItemRepository, 
+            IQuizRepository QuizRepository, IQuestionRepository QuizItemRepository, 
             ILogManager logger, IHttpContextAccessor accessor)
         {
             _QuizRepository = QuizRepository;
@@ -40,14 +40,6 @@ namespace SquareQ.Quiz.Controllers
             return _QuizRepository.GetQuizzes(int.Parse(moduleid));
         }
 
-        // GET api/<controller>/question/quizid=x
-        [HttpGet("question")]
-        [Authorize(Policy = PolicyNames.ViewModule)]
-        public IEnumerable<QuizItem> GetQuestions(string QuizID)
-        {
-             return _QuizItemRepository.GetQuizItems(int.Parse(QuizID));
-        }
-
         // GET api/<controller>/5
         [HttpGet("{id}")]
         [Authorize(Policy = PolicyNames.ViewModule)]
@@ -59,20 +51,6 @@ namespace SquareQ.Quiz.Controllers
                 Quiz = null;
             }
             return Quiz;
-        }
-
-        // GET api/<controller>/question/5
-        [HttpGet("question/{id}")]
-        [Authorize(Policy = PolicyNames.ViewModule)]
-        public QuizItem GetQuestion(int id)
-        {
-            QuizItem QuizItem = _QuizItemRepository.GetQuizItem(id);
-            if (QuizItem != null && QuizItem.ModuleId != _entityId)
-            {
-                QuizItem = null;
-            }
-
-            return QuizItem;
         }
 
         // POST api/<controller>
@@ -88,20 +66,6 @@ namespace SquareQ.Quiz.Controllers
             return Quiz;
         }
 
-        // POST api/<controller>/question
-        [HttpPost("question")]
-        [Authorize(Policy = PolicyNames.EditModule)]
-        public QuizItem PostQuestion([FromBody] QuizItem QuizItem)
-        {
-            if (ModelState.IsValid && QuizItem.ModuleId == _entityId)
-            {
-                QuizItem = _QuizItemRepository.AddQuizItem(QuizItem);
-                _logger.Log(LogLevel.Information, this, LogFunction.Create, "QuizItem Added {QuizItem}", QuizItem);
-            }
-
-            return QuizItem;
-        }
-
         // PUT api/<controller>/5
         [HttpPut("{id}")]
         [Authorize(Policy = PolicyNames.EditModule)]
@@ -115,20 +79,6 @@ namespace SquareQ.Quiz.Controllers
             return Quiz;
         }
 
-        // PUT api/<controller>/5
-        [HttpPut("question/{id}")]
-        [Authorize(Policy = PolicyNames.EditModule)]
-        public QuizItem PutQuestion(int id, [FromBody] QuizItem QuizItem)
-        {
-            if (ModelState.IsValid && QuizItem.ModuleId == _entityId)
-            {
-                QuizItem = _QuizItemRepository.UpdateQuizItem(QuizItem);
-                _logger.Log(LogLevel.Information, this, LogFunction.Update, "QuizItem Updated {QuizItem}", QuizItem);
-            }
-
-            return QuizItem;
-        }
-
         // DELETE api/<controller>/5
         [HttpDelete("{id}")]
         [Authorize(Policy = PolicyNames.EditModule)]
@@ -139,19 +89,6 @@ namespace SquareQ.Quiz.Controllers
             {
                 _QuizRepository.DeleteQuiz(id);
                 _logger.Log(LogLevel.Information, this, LogFunction.Delete, "Quiz Deleted {QuizId}", id);
-            }
-        }
-
-        // DELETE api/<controller>/5
-        [HttpDelete("question/{id}")]
-        [Authorize(Policy = PolicyNames.EditModule)]
-        public void DeleteQuestion(int id)
-        {
-            QuizItem QuizItem = _QuizItemRepository.GetQuizItem(id);
-            if (QuizItem != null && QuizItem.ModuleId == _entityId)
-            {
-                _QuizItemRepository.DeleteQuizItem(id);
-                _logger.Log(LogLevel.Information, this, LogFunction.Delete, "QuizItem Deleted {QuizItemId}", id);
             }
         }
     }

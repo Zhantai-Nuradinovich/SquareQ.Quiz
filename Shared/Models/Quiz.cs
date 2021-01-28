@@ -11,9 +11,8 @@ namespace SquareQ.Quiz.Models
         public int QuizId { get; set; }
         public int ModuleId { get; set; }
         public string Name { get; set; }
-        public string QuizType { get; set; }
         public string Description { get; set; }
-        public virtual ICollection<QuizItem> Items { get; set; }
+        public virtual ICollection<Question> Questions { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public string ModifiedBy { get; set; }
