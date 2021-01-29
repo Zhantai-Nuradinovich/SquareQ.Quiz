@@ -9,7 +9,7 @@ using SquareQ.Quiz.Models;
 
 namespace SquareQ.Quiz.Services
 {
-    public class QuestionService : ServiceBase, IQuizService, IService
+    public class QuestionService : ServiceBase, IQuestionService, IService
     {
         private readonly SiteState _siteState;
 
@@ -18,58 +18,32 @@ namespace SquareQ.Quiz.Services
             _siteState = siteState;
         }
 
-         private string Apiurl => CreateApiUrl(_siteState.Alias, "Quiz");
+        private string Apiurl => CreateApiUrl(_siteState.Alias, "Question");
 
-        public async Task<List<Models.Quiz>> GetQuizzesAsync(int ModuleId)
+        public async Task<List<Question>> GetQuestionsAsync(int QuizID)
         {
-            List<Models.Quiz> Quizs = await GetJsonAsync<List<Models.Quiz>>(CreateAuthorizationPolicyUrl($"{Apiurl}?moduleid={ModuleId}", ModuleId));
-            return Quizs.OrderBy(item => item.Name).ToList();
+            List<Question> Questions = await GetJsonAsync<List<Question>>(CreateAuthorizationPolicyUrl($"{Apiurl}?quizid={QuizID}", QuizID));
+            return Questions.ToList();
         }
 
-        public async Task<List<QuizItem>> GetQuizItemsAsync(int ModuleId, int QuizID)
+        public async Task<Question> GetQuestionAsync(int QuestionId, int QuizID)
         {
-            List<QuizItem> QuizItems = await GetJsonAsync<List<QuizItem>>(CreateAuthorizationPolicyUrl($"{Apiurl}/question?quizid={QuizID}", ModuleId));
-            return QuizItems.ToList();
+            return await GetJsonAsync<Question>(CreateAuthorizationPolicyUrl($"{Apiurl}/{QuestionId}", QuizID));
         }
 
-        public async Task<Models.Quiz> GetQuizAsync(int QuizId, int ModuleId)
+        public async Task<Question> AddQuestionAsync(Question Question)
         {
-            return await GetJsonAsync<Models.Quiz>(CreateAuthorizationPolicyUrl($"{Apiurl}/{QuizId}", ModuleId));
+            return await PostJsonAsync<Question>(CreateAuthorizationPolicyUrl($"{Apiurl}", Question.QuizID), Question);
         }
 
-        public async Task<QuizItem> GetQuestionAsync(int QuizItemId, int ModuleId) //new
+        public async Task<Question> UpdateQuestionAsync(Question Question) 
         {
-            return await GetJsonAsync<QuizItem>(CreateAuthorizationPolicyUrl($"{Apiurl}/question/{QuizItemId}", ModuleId));
+            return await PutJsonAsync<Question>(CreateAuthorizationPolicyUrl($"{Apiurl}/{Question.QuestionId}", Question.QuizID), Question);
         }
 
-        public async Task<Models.Quiz> AddQuizAsync(Models.Quiz Quiz)
+        public async Task DeleteQuestionAsync(int QuestionId, int QuizID)
         {
-            return await PostJsonAsync<Models.Quiz>(CreateAuthorizationPolicyUrl($"{Apiurl}", Quiz.ModuleId), Quiz);
-        }
-
-        public async Task<QuizItem> AddQuestionAsync(QuizItem QuizItem) //new
-        {
-            return await PostJsonAsync<QuizItem>(CreateAuthorizationPolicyUrl($"{Apiurl}/question", QuizItem.ModuleId), QuizItem);
-        }
-
-        public async Task<Models.Quiz> UpdateQuizAsync(Models.Quiz Quiz)
-        {
-            return await PutJsonAsync<Models.Quiz>(CreateAuthorizationPolicyUrl($"{Apiurl}/{Quiz.QuizId}", Quiz.ModuleId), Quiz);
-        }
-
-        public async Task<QuizItem> UpdateQuestionAsync(QuizItem QuizItem) //new
-        {
-            return await PutJsonAsync<QuizItem>(CreateAuthorizationPolicyUrl($"{Apiurl}/question/{QuizItem.QuizItemId}", QuizItem.ModuleId), QuizItem);
-        }
-
-        public async Task DeleteQuizAsync(int QuizId, int ModuleId)
-        {
-            await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/{QuizId}", ModuleId));
-        }
-
-        public async Task DeleteQuestionAsync(int QuizItemId, int ModuleId) //new
-        {
-            await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/question/{QuizItemId}", ModuleId));
+            await DeleteAsync(CreateAuthorizationPolicyUrl($"{Apiurl}/{QuestionId}", QuizID));
         }
     }
 }

@@ -8,12 +8,12 @@ namespace SquareQ.Quiz.Services
     {
         Task<List<Question>> GetQuestionsAsync(int QuizID);
 
-        Task<Question> GetQuestionAsync(int QuestionId);
+        Task<Question> GetQuestionAsync(int QuestionId, int QuizID);
 
         Task<Question> AddQuestionAsync(Question Question);
 
         Task<Question> UpdateQuestionAsync(Question Question);
 
-        Task DeleteQuestionAsync(int QuestionId);
+        Task DeleteQuestionAsync(int QuestionId, int QuizID);
     }
 }

@@ -8,12 +8,12 @@ namespace SquareQ.Quiz.Services
     {
         Task<List<Answer>> GetAnswersAsync(int QuestionID);
 
-        Task<Answer> GetAnswerAsync(int AnswerId);
+        Task<Answer> GetAnswerAsync(int AnswerId, int QuestionID);
 
         Task<Answer> AddAnswerAsync(Answer Answer);
 
         Task<Answer> UpdateAnswerAsync(Answer Answer);
 
-        Task DeleteAnswerAsync(int AnswerId);
+        Task DeleteAnswerAsync(int AnswerId, int QuestionID);
     }
 }
