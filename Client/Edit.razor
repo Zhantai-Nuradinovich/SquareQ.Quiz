@@ -87,7 +87,6 @@
                 if (Quiz != null)
                 {
                     _name = Quiz.Name;
-                    _quiztype = Quiz.QuizType;
                     _description = Quiz.Description;
                     _createdby = Quiz.CreatedBy;
                     _createdon = Quiz.CreatedOn;
@@ -112,7 +111,6 @@
                 Quiz Quiz = new Quiz();
                 Quiz.ModuleId = ModuleState.ModuleId;
                 Quiz.Name = _name;
-                Quiz.QuizType = _quiztype;
                 Quiz.Description = _description;
                 Quiz = await QuizService.AddQuizAsync(Quiz);
                 await logger.LogInformation("Quiz Added {Quiz}", Quiz);
@@ -121,7 +119,6 @@
             {
                 Quiz Quiz = await QuizService.GetQuizAsync(_id, ModuleState.ModuleId);
                 Quiz.Name = _name;
-                Quiz.QuizType = _quiztype;
                 Quiz.Description = _description;
                 await QuizService.UpdateQuizAsync(Quiz);
                 await logger.LogInformation("Quiz Updated {Quiz}", Quiz);

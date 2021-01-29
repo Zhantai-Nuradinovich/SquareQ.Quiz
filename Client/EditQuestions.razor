@@ -3,12 +3,12 @@
 @using SquareQ.Quiz.Models
 
 @inherits ModuleBase
-@inject IQuizService QuizService
+@inject IQuestionService QuestionService
 @inject NavigationManager NavigationManager
 
 <h4>Add a new question</h4>
 
-@if (_item != null)
+@if (_question != null)
 {
     <table class="table table-borderless">
         <tr>
@@ -16,7 +16,7 @@
                 <Label For="question" HelpText="Enter a question">Question: </Label>
             </td>
             <td>
-                <input id="question" class="form-control" @bind="@_item.Question" />
+                <input id="question" class="form-control" @bind="@_question.Text" />
             </td>
         </tr>
         <tr>
@@ -24,7 +24,7 @@
                 <Label For="picture" HelpText="Enter a path for picture">Picture Path: </Label>
             </td>
             <td>
-                <input id="picture" class="form-control" @bind="@_item.PicturePath" />
+                <input id="picture" class="form-control" @bind="@_question.PicturePath" />
             </td>
         </tr>
         <tr>
@@ -32,7 +32,15 @@
                 <Label For="answ" HelpText="Enter answers">Answers: </Label>
             </td>
             <td>
-                <input id="answ" class="form-control" @bind="@_item.Answers" />
+                @*<input id="answ" class="form-control" @bind="@_question.Answers" />*@
+                @if (_question.Answers != null)
+                {
+                    <EditAnswers QuestionID="@_question.QuestionId" />
+                }
+                else
+                {
+                    <button>Add first</button>
+                }
             </td>
         </tr>
         <tr>
@@ -40,7 +48,7 @@
                 <Label For="rightansw" HelpText="Enter right answer">Right answer: </Label>
             </td>
             <td>
-                <input id="rightansw" class="form-control" @bind="@_item.RightAnswer" />
+                <input id="rightansw" class="form-control" @bind="@_question.RightAnswer" />
             </td>
         </tr>
         <tr>
@@ -48,7 +56,7 @@
                 <Label For="qtype" HelpText="Enter question type">Question type: </Label>
             </td>
             <td>
-                <input id="qtype" class="form-control" @bind="@_item.QuestionType" />
+                <input id="qtype" class="form-control" @bind="@_question.QuestionType" />
             </td>
         </tr>
     </table>
@@ -68,12 +76,12 @@
 
     public override string Actions => "Add,Edit";
 
-    public override string Title => "Manage QuizItem";
+    public override string Title => "Manage Question";
 
-    List<QuizItem> _quizItems;
+    List<Question> _questions;
 
-    QuizItem _item;
-    IEnumerator<QuizItem> enumerator;
+    Question _question;
+    IEnumerator<Question> enumerator;
 
     protected override async Task OnInitializedAsync()
     {
@@ -84,33 +92,31 @@
     {
         try
         {
-            _quizItems = await QuizService.GetQuizItemsAsync(ModuleState.ModuleId, Id);
+            _questions = await QuestionService.GetQuestionsAsync(Id);
 
-            if (_quizItems == null)
+            if (_questions == null)
             {
-                _quizItems = new List<QuizItem>();
-                _item = new QuizItem()
+                _questions = new List<Question>();
+                _question = new Question()
                 {
-                    ModuleId = ModuleState.ModuleId,
                     QuizID = Id,
-                    Answers = "",
                     PicturePath = "",
-                    Question = "",
+                    Text = "",
                     QuestionType = "",
                     RightAnswer = ""
                 };
 
-                _quizItems.Add(_item);
+                _questions.Add(_question);
             }
 
-            enumerator = _quizItems.GetEnumerator();
+            enumerator = _questions.GetEnumerator();
 
             if (enumerator.MoveNext())
-                _item = enumerator.Current;
+                _question = enumerator.Current;
         }
         catch (Exception ex)
         {
-            await logger.LogError(ex, "Error Loading QuizItems {QuizId} {Error}", Id, ex.Message);
+            await logger.LogError(ex, "Error Loading Questions {QuizId} {Error}", Id, ex.Message);
             AddModuleMessage("Error Loading QuizItems", MessageType.Error);
         }
     }
@@ -119,16 +125,16 @@
     {
         try
         {
-            _item = await QuizService.AddQuestionAsync(_item);
-            await logger.LogInformation("QuizItem Added {_item}", _item);
+            _question = await QuestionService.AddQuestionAsync(_question);
+            await logger.LogInformation("Question Added {_question}", _question);
 
             await GetItems();
             //NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)
         {
-            await logger.LogError(ex, "Error Adding QuizItem {Error}", ex.Message);
-            AddModuleMessage("Error Adding QuizItem", MessageType.Error);
+            await logger.LogError(ex, "Error Adding Question {Error}", ex.Message);
+            AddModuleMessage("Error Adding Question", MessageType.Error);
         }
     }
 
@@ -136,23 +142,22 @@
     {
         try
         {
-            QuizItem QuizItem = await QuizService.GetQuestionAsync(_item.QuizItemId, ModuleState.ModuleId);
-            QuizItem.Question = _item.Question;
-            QuizItem.QuestionType = _item.QuestionType;
-            QuizItem.PicturePath = _item.PicturePath;
-            QuizItem.Answers = _item.Answers;
-            QuizItem.RightAnswer = _item.RightAnswer;
-            QuizItem.QuizID = Id;
-            QuizItem.ModuleId = ModuleState.ModuleId;
+            Question Question = await QuestionService.GetQuestionAsync(_question.QuestionId, _question.QuizID);
+            Question.Text = _question.Text;
+            Question.QuestionType = _question.QuestionType;
+            Question.PicturePath = _question.PicturePath;
+            Question.RightAnswer = _question.RightAnswer;
+            Question.SecondsforPicture = _question.SecondsforPicture;
+            Question.QuizID = Id;
 
-            await QuizService.UpdateQuestionAsync(QuizItem);
-            await logger.LogInformation("QuizItem Updated {QuizItem}", QuizItem);
+            await QuestionService.UpdateQuestionAsync(Question);
+            await logger.LogInformation("Question Updated {Question}", Question);
             NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)
         {
-            await logger.LogError(ex, "Error Saving QuizItem {Error}", ex.Message);
-            AddModuleMessage("Error Saving QuizItem", MessageType.Error);
+            await logger.LogError(ex, "Error Saving Question {Error}", ex.Message);
+            AddModuleMessage("Error Saving Question", MessageType.Error);
         }
     }
 
@@ -162,17 +167,15 @@
         {
             if (enumerator.MoveNext())
             {
-                _item = enumerator.Current;
+                _question = enumerator.Current;
             }
             else
             {
-                _item = new QuizItem()
+                _question = new Question()
                 {
-                    ModuleId = ModuleState.ModuleId,
                     QuizID = Id,
-                    Answers = "",
                     PicturePath = "",
-                    Question = "",
+                    Text = "",
                     QuestionType = "",
                     RightAnswer = ""
                 };

@@ -15,11 +15,17 @@ namespace SquareQ.Quiz.Controllers
     {
         private readonly IAnswerRepository _AnswerRepository;
         private readonly ILogManager _logger;
+        protected int _entityId = -1;
 
-        public AnswerController(IAnswerRepository answerRepository, ILogManager logger)
+        public AnswerController(IAnswerRepository answerRepository, ILogManager logger, IHttpContextAccessor accessor)
         {
             _AnswerRepository = answerRepository;
             _logger = logger;
+
+            if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
+            {
+                _entityId = int.Parse(accessor.HttpContext.Request.Query["entityid"]);
+            }
         }
 
         // GET api/<controller>/

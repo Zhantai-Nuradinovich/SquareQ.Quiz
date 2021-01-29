@@ -14,16 +14,12 @@ namespace SquareQ.Quiz.Controllers
     public class QuizController : Controller
     {
         private readonly IQuizRepository _QuizRepository;
-        private readonly IQuestionRepository _QuizItemRepository;
         private readonly ILogManager _logger;
         protected int _entityId = -1;
 
-        public QuizController(
-            IQuizRepository QuizRepository, IQuestionRepository QuizItemRepository, 
-            ILogManager logger, IHttpContextAccessor accessor)
+        public QuizController(IQuizRepository QuizRepository, ILogManager logger, IHttpContextAccessor accessor)
         {
             _QuizRepository = QuizRepository;
-            _QuizItemRepository = QuizItemRepository;
             _logger = logger;
 
             if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))

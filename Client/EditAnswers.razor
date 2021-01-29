@@ -1,0 +1,60 @@
+﻿@using Oqtane.Modules.Controls
+@using SquareQ.Quiz.Services
+@using SquareQ.Quiz.Models
+
+@inherits ModuleBase
+@inject IAnswerService AnswerService
+@inject NavigationManager NavigationManager
+
+
+<div class="group">
+    @foreach (var answer in _answers)
+    {
+        <div class="group-item">
+            <input class="form-control" @bind="@_answer.Text" placeholder="Answer" />
+            <input type="checkbox" @bind="@_answer.IsCorrect" placeholder="Is correct" />
+        </div>
+        <br />
+        <br />
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public int QuestionID { get; set; }
+
+    public List<Answer> _answers { get; set; }
+
+    Answer _answer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAnswers();
+    }
+
+    private async Task GetAnswers()
+    {
+        try
+        {
+            _answers = await AnswerService.GetAnswersAsync(QuestionID);
+
+            if (_answers == null)
+            {
+                _answers = new List<Answer>();
+                _answer = new Answer()
+                {
+                    QuestionID = QuestionID,
+                    Text = ""
+                };
+
+                _answers.Add(_answer);
+            }
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Answers {QuestionID} {Error}", QuestionID, ex.Message);
+            AddModuleMessage("Error Loading Answers", MessageType.Error);
+        }
+    }
+}
