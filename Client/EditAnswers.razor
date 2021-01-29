@@ -17,6 +17,8 @@
         <br />
         <br />
     }
+    <button @onclick="Prepare">+</button>
+    <button @onclick="Save">Save</button>
 </div>
 
 
@@ -55,6 +57,42 @@
         {
             await logger.LogError(ex, "Error Loading Answers {QuestionID} {Error}", QuestionID, ex.Message);
             AddModuleMessage("Error Loading Answers", MessageType.Error);
+        }
+    }
+
+    private async Task Prepare()
+    {
+        try
+        {
+            _answer = await AnswerService.AddAnswerAsync(_answer);
+            await logger.LogInformation("Answer Added {_answer}", _answer);
+
+            await GetAnswers();
+            //NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Adding Answer {Error}", ex.Message);
+            AddModuleMessage("Error Adding Answer", MessageType.Error);
+        }
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            Answer Answer = await AnswerService.GetAnswerAsync(_answer.AnswerId, _answer.QuestionID);
+            Answer.Text = _answer.Text;
+            Answer.IsCorrect = _answer.IsCorrect;
+
+            await AnswerService.UpdateAnswerAsync(Answer);
+            await logger.LogInformation("Answer Updated {Answer}", Answer);
+            NavigationManager.NavigateTo(NavigateUrl());
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Saving Answer {Error}", ex.Message);
+            AddModuleMessage("Error Saving Answer", MessageType.Error);
         }
     }
 }
