@@ -14,7 +14,6 @@ namespace SquareQ.Quiz.Models
         public string Text { get; set; }
         public string PicturePath { get; set; }
         public virtual ICollection<Answer> Answers { get; set; }
-        public string RightAnswer { get; set; }
         public string QuestionType { get; set; }
         public int SecondsforPicture { get; set; } //to close picture
         public int QuizID { get; set; }

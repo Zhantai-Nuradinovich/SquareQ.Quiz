@@ -32,23 +32,14 @@
                 <Label For="answ" HelpText="Enter answers">Answers: </Label>
             </td>
             <td>
-                @*<input id="answ" class="form-control" @bind="@_question.Answers" />*@
-                @if (_question.Answers != null)
+                @if (_question.QuestionId != 0)
                 {
                     <EditAnswers QuestionID="@_question.QuestionId" />
                 }
                 else
                 {
-                    <button>Add first</button>
+                    <button type="button" class="btn btn-success" @onclick="AddNew">+</button>
                 }
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <Label For="rightansw" HelpText="Enter right answer">Right answer: </Label>
-            </td>
-            <td>
-                <input id="rightansw" class="form-control" @bind="@_question.RightAnswer" />
             </td>
         </tr>
         <tr>
@@ -57,6 +48,14 @@
             </td>
             <td>
                 <input id="qtype" class="form-control" @bind="@_question.QuestionType" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <Label For="seconds" HelpText="Enter number of secodns, before image will be disapeared (if applicable)">Seconds: </Label>
+            </td>
+            <td>
+                <input id="seconds" class="form-control" @bind="@_question.SecondsforPicture" />
             </td>
         </tr>
     </table>
@@ -102,8 +101,7 @@
                     QuizID = Id,
                     PicturePath = "",
                     Text = "",
-                    QuestionType = "",
-                    RightAnswer = ""
+                    QuestionType = ""
                 };
 
                 _questions.Add(_question);
@@ -146,7 +144,6 @@
             Question.Text = _question.Text;
             Question.QuestionType = _question.QuestionType;
             Question.PicturePath = _question.PicturePath;
-            Question.RightAnswer = _question.RightAnswer;
             Question.SecondsforPicture = _question.SecondsforPicture;
             Question.QuizID = Id;
 
@@ -176,8 +173,7 @@
                     QuizID = Id,
                     PicturePath = "",
                     Text = "",
-                    QuestionType = "",
-                    RightAnswer = ""
+                    QuestionType = ""
                 };
             }
         }

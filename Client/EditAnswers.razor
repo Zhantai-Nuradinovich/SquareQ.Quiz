@@ -7,19 +7,28 @@
 @inject NavigationManager NavigationManager
 
 
-<div class="group">
-    @foreach (var answer in _answers)
-    {
-        <div class="group-item">
-            <input class="form-control" @bind="@_answer.Text" placeholder="Answer" />
-            <input type="checkbox" @bind="@_answer.IsCorrect" placeholder="Is correct" />
-        </div>
-        <br />
-        <br />
-    }
-    <button @onclick="Prepare">+</button>
-    <button @onclick="Save">Save</button>
-</div>
+@if (_answers != null)
+{
+    <div class="group">
+        @foreach (var answer in _answers)
+        {
+            <div class="row">
+                <div class="col">
+                    <input class="form-control" @bind="@_answer.Text" placeholder="Answer" />
+                </div>
+                <div class="col">
+                    <input type="checkbox" @bind="@_answer.IsCorrect" placeholder="Is correct" />
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-success" @onclick="() => Save(answer)">Save</button>
+                </div>
+            </div>
+            <br />
+            <br />
+        }
+        <button type="button" class="btn btn-success" @onclick="Add">+</button>
+    </div>
+}
 
 
 @code {
@@ -60,7 +69,7 @@
         }
     }
 
-    private async Task Prepare()
+    private async Task Add()
     {
         try
         {
@@ -68,7 +77,6 @@
             await logger.LogInformation("Answer Added {_answer}", _answer);
 
             await GetAnswers();
-            //NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)
         {
@@ -77,7 +85,7 @@
         }
     }
 
-    private async Task Save()
+    private async Task Save(Answer _answer)
     {
         try
         {

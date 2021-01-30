@@ -22,7 +22,6 @@ CREATE TABLE [dbo].[SquareQQuestion](
 	[QuestionId] [int] IDENTITY(1,1) NOT NULL,
 	[QuizID] [int] NOT NULL,
 	[Text] [nvarchar](256) NOT NULL,
-	[RightAnswer] [nvarchar](256) NOT NULL,
 	[QuestionType] [nvarchar](256) NOT NULL,
 	[SecondsForPicture] [int] NOT NULL,
   CONSTRAINT [PK_SquareQQuestion] PRIMARY KEY CLUSTERED 
