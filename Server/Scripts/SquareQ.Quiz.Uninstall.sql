@@ -2,11 +2,11 @@
 Remove SquareQQuiz table
 */
 
-DROP TABLE [dbo].[SquareQQuiz]
+DROP TABLE [dbo].[SquareQAnswer]
 GO
 
 DROP TABLE [dbo].[SquareQQuestion]
 GO
 
-DROP TABLE [dbo].[SquareQAnswer]
+DROP TABLE [dbo].[SquareQQuiz]
 GO

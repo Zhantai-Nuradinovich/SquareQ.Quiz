@@ -12,15 +12,21 @@
     <div class="group">
         @foreach (var answer in _answers)
         {
-            <div class="row">
-                <div class="col">
-                    <input class="form-control" @bind="@_answer.Text" placeholder="Answer" />
+            <div class="col-md-8">
+                <div class="col-md-2">
+                    <div class='form-group internal'>
+                        <input class="form-control col-md-8" type="text" @bind="@_answer.Text" placeholder="Answer" />
+                    </div>
                 </div>
-                <div class="col">
-                    <input type="checkbox" @bind="@_answer.IsCorrect" placeholder="Is correct" />
+                <div class="col-md-2">
+                    <div class='form-group internal'>
+                        <input class="form-control col-md-8" type="checkbox" @bind="@_answer.IsCorrect" placeholder="Is correct" />
+                    </div>
                 </div>
-                <div class="col">
-                    <button type="button" class="btn btn-success" @onclick="() => Save(answer)">Save</button>
+                <div class="col-md-2">
+                    <div class='form-group internal'>
+                        <button type="button" class="btn btn-success" @onclick="() => Save(answer)">Save</button>
+                    </div>
                 </div>
             </div>
             <br />

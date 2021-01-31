@@ -2,6 +2,8 @@
 @using SquareQ.Quiz.Services
 
 @inject IQuizService QuizService
+@inject IQuestionService QuestionService
+@inject IAnswerService AnswerService
 
 <div class="my-quiz-container" style="min-height: 400px;">
     <div id="quiz">
@@ -14,7 +16,7 @@
                 {
                     <div class="col-xs-3 col-lg-2">
                         <p>Вопрос</p>
-                        <span class="animated">@curentQuestion/@Quiz.Items?.Count</span>
+                        <span class="animated">@curentQuestion/@Quiz.Questions?.Count</span>
                     </div>
                 }
                 <div class="col-xs-3 col-lg-2 animated">
@@ -28,7 +30,7 @@
                     @if (!IsStartButtonClicked)
                     {
                         <div id="quiz-options">
-                            @if (Quiz.Items != null && Quiz.Items.Count != 0)
+                            @if (Quiz.Questions != null && Quiz.Questions.Count != 0)
                             {
                                 <Animation Effect="@Effect.ZoomInDown"
                                            Speed="@Speed.Fast"
@@ -45,7 +47,7 @@
                         {
                             <p id="quiz-question" class="animated">
                                 <Animation Effect="@Effect.ZoomIn" Speed="@Speed.Fast" Delay="@Delay.None" Enabled="IsAnimated" IterationCount="1" OnAnimationEnd="AnimationEnd">
-                                    @QuizItem?.Question
+                                    @QuizItem?.Text
                                     @if (!string.IsNullOrEmpty(QuizItem?.PicturePath))
                                     {
                                         if (!IsTimeIsUp)
@@ -69,7 +71,7 @@
                                                Enabled="IsAnimated"
                                                IterationCount="1"
                                                OnAnimationEnd="AnimationEnd">
-                                        @foreach (var variant in QuizItem?.Answers.Split("1NZN1"))
+                                        @foreach (var variant in QuizItem.Answers)
                                         {
                                             @if (QuizItem.QuestionType == "Photo")
                                             {
@@ -115,9 +117,9 @@
     [Parameter]
     public Quiz Quiz { get; set; }
 
-    public List<QuizItem> UserQuizItems { get; set; } = new List<QuizItem>();
-    public QuizItem QuizItem { get; set; }
-    IEnumerator<QuizItem> Enumerator { get; set; }
+    public List<Question> UserQuizItems { get; set; } = new List<Question>();
+    public Question QuizItem { get; set; }
+    IEnumerator<Question> Enumerator { get; set; }
 
     bool IsQuizStarted { get; set; } = false;
     bool IsStartButtonClicked { get; set; } = false;
@@ -129,7 +131,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Quiz.Items = await QuizService.GetQuizItemsAsync(Quiz.ModuleId, Quiz.QuizId);
+        await GetItems();
+    }
+
+    private async Task GetItems()
+    {
+        Quiz.Questions = await QuestionService.GetQuestionsAsync(Quiz.QuizId);
+
+        if(Quiz.Questions != null)
+            foreach (var item in Quiz.Questions)
+                item.Answers = await AnswerService.GetAnswersAsync(item.QuestionId);
     }
 
     private void RunAnimation()
@@ -144,9 +155,10 @@
 
     public void CheckResults()
     {
-        foreach (var question in Quiz.Items)
+        foreach (var question in Quiz.Questions)
         {
-            if (question.RightAnswer == UserQuizItems.Find(x => x.QuizItemId == question.QuizItemId).RightAnswer)
+            Answer answer = question.Answers.First(x => x.IsCorrect);
+            if (answer.IsChosen)
             {
                 TotalScore++;
             }
@@ -160,16 +172,16 @@
     {
         IsQuizStarted = true;
         IsStartButtonClicked = true;
-        Enumerator = Quiz.Items.GetEnumerator();
+        Enumerator = Quiz.Questions.GetEnumerator();
         if (Enumerator.MoveNext())
         {
             QuizItem = Enumerator.Current;
         }
     }
 
-    public void NextQuestion(string variant)
+    public void NextQuestion(Answer variant)
     {
-        QuizItem.RightAnswer = variant;
+        QuizItem.Answers.First(var => var.AnswerId == variant.AnswerId).IsChosen = true;
         UserQuizItems.Add(QuizItem);
         if (Enumerator.MoveNext())
         {

@@ -180,3 +180,12 @@
         width: 66%;
     }
 }
+
+
+.indent-small {
+    margin-left: 5px;
+}
+
+.form-group.internal {
+    margin-bottom: 0;
+}

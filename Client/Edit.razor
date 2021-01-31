@@ -18,25 +18,10 @@
     </tr>
     <tr>
         <td>
-            <Label For="quiztype" HelpText="Enter a type">Type: </Label>
-        </td>
-        <td>
-            <input id="quiztype" class="form-control" @bind="@_quiztype" />
-        </td>
-    </tr>
-    <tr>
-        <td>
             <Label For="description" HelpText="Enter a description">Description: </Label>
         </td>
         <td>
             <input id="description" class="form-control" @bind="@_description" />
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <Label For="quiz" HelpText="Edit questions">Questions: </Label>
-        </td>
-        <td>
         </td>
     </tr>
 </table>
@@ -69,7 +54,6 @@
 
     int _id;
     string _name;
-    string _quiztype;
     string _description;
     string _createdby;
     DateTime _createdon;
