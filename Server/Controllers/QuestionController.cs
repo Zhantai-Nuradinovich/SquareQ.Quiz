@@ -22,9 +22,9 @@ namespace SquareQ.Quiz.Controllers
             _QuestionRepository = questionRepository;
             _logger = logger;
 
-            if (accessor.HttpContext.Request.Query.ContainsKey("entityid"))
+            if (accessor.HttpContext.Request.Query.ContainsKey("quizid"))
             {
-                _entityId = int.Parse(accessor.HttpContext.Request.Query["entityid"]);
+                _entityId = int.Parse(accessor.HttpContext.Request.Query["quizid"]);
             }
         }
 

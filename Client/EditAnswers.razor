@@ -79,6 +79,9 @@
     {
         try
         {
+            if (_answer == null)
+                _answer = new Answer() { IsCorrect = false, Text = "Change me, please!!", QuestionID = QuestionID };
+
             _answer = await AnswerService.AddAnswerAsync(_answer);
             await logger.LogInformation("Answer Added {_answer}", _answer);
 

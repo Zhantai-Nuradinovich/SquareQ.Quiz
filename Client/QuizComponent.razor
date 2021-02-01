@@ -158,10 +158,9 @@
         foreach (var question in Quiz.Questions)
         {
             Answer answer = question.Answers.First(x => x.IsCorrect);
+
             if (answer.IsChosen)
-            {
                 TotalScore++;
-            }
         }
 
 
@@ -173,10 +172,9 @@
         IsQuizStarted = true;
         IsStartButtonClicked = true;
         Enumerator = Quiz.Questions.GetEnumerator();
+
         if (Enumerator.MoveNext())
-        {
             QuizItem = Enumerator.Current;
-        }
     }
 
     public void NextQuestion(Answer variant)

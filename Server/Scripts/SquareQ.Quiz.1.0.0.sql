@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[SquareQQuiz](
 	[QuizId] [int] IDENTITY(1,1) NOT NULL,
 	[ModuleId] [int] NOT NULL,
 	[Name] [nvarchar](256) NOT NULL,
-	[Description] [nvarchar](256) NOT NULL,
+	[Description] [nvarchar](256),
 	[CreatedBy] [nvarchar](256) NOT NULL,
 	[CreatedOn] [datetime] NOT NULL,
 	[ModifiedBy] [nvarchar](256) NOT NULL,
@@ -23,7 +23,8 @@ CREATE TABLE [dbo].[SquareQQuestion](
 	[QuizID] [int] NOT NULL,
 	[Text] [nvarchar](256) NOT NULL,
 	[QuestionType] [nvarchar](256) NOT NULL,
-	[SecondsForPicture] [int] NOT NULL,
+	[PicturePath] [nvarchar](256),
+	[SecondsForPicture] [int],
   CONSTRAINT [PK_SquareQQuestion] PRIMARY KEY CLUSTERED 
   (
 	[QuestionId] ASC
