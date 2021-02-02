@@ -79,7 +79,7 @@
                                                 {
                                                     <button class="btn quiz-ans-btn animated"
                                                             @onclick="(e) => { NextQuestion(variant); RunAnimation(); }">
-                                                        <img src="@variant" style="height: 300px; width: 300px" />
+                                                        <img src="@variant.Text" style="height: 300px; width: 300px" />
                                                     </button>
                                                 }
                                             }
@@ -87,7 +87,7 @@
                                             {
                                                 <button class="btn quiz-ans-btn animated"
                                                         @onclick="(e) => { NextQuestion(variant); RunAnimation(); }">
-                                                    @variant
+                                                    @variant.Text
                                                 </button>
                                             }
                                         }

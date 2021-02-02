@@ -32,7 +32,7 @@
                 <Label For="answ" HelpText="Enter answers">Answers: </Label>
             </td>
             <td>
-                @if (_question.QuestionId != 0)
+                @if (_question.QuestionId > 0)
                 {
                     <EditAnswers QuestionID="@_question.QuestionId" />
                 }
@@ -149,7 +149,6 @@
 
             await QuestionService.UpdateQuestionAsync(Question);
             await logger.LogInformation("Question Updated {Question}", Question);
-            NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)
         {
@@ -181,6 +180,10 @@
         {
             await logger.LogError(ex, "Error Enumerating QuizItem {Error}", ex.Message);
             AddModuleMessage("Error Enumerating QuizItem", MessageType.Error);
+        }
+        finally
+        {
+            StateHasChanged();
         }
     }
 }

@@ -9,31 +9,29 @@
 
 @if (_answers != null)
 {
-    <div class="group">
-        @foreach (var answer in _answers)
-        {
-            <div class="col-md-8">
-                <div class="col-md-2">
-                    <div class='form-group internal'>
-                        <input class="form-control col-md-8" type="text" @bind="@_answer.Text" placeholder="Answer" />
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class='form-group internal'>
-                        <input class="form-control col-md-8" type="checkbox" @bind="@_answer.IsCorrect" placeholder="Is correct" />
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class='form-group internal'>
-                        <button type="button" class="btn btn-success" @onclick="() => Save(answer)">Save</button>
-                    </div>
+    @foreach (var answer in _answers)
+    {
+        <div class="row">
+            <div class="col-md-4">
+                <div class='form-group internal'>
+                    <input class="form-control" @bind="@answer.Text" placeholder="Answer" />
                 </div>
             </div>
-            <br />
-            <br />
-        }
-        <button type="button" class="btn btn-success" @onclick="Add">+</button>
-    </div>
+            <div class="col-md-4">
+                <div class='form-group internal'>
+                    <Microsoft.AspNetCore.Components.Forms.InputCheckbox class="form-control" @bind="@answer.IsCorrect" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class='form-group internal'>
+                    <button type="button" class="btn btn-success" @onclick="() => Save(answer)">Save</button>
+                </div>
+            </div>
+        </div>
+        <br />
+        <br />
+    }
+    <button type="button" class="btn btn-success" @onclick="Add">+</button>
 }
 
 
@@ -47,6 +45,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        _answer = new Answer()
+        {
+            QuestionID = QuestionID,
+            Text = "Change me, please!!"
+        };
+
         await GetAnswers();
     }
 
@@ -59,11 +63,6 @@
             if (_answers == null)
             {
                 _answers = new List<Answer>();
-                _answer = new Answer()
-                {
-                    QuestionID = QuestionID,
-                    Text = ""
-                };
 
                 _answers.Add(_answer);
             }
@@ -104,7 +103,6 @@
 
             await AnswerService.UpdateAnswerAsync(Answer);
             await logger.LogInformation("Answer Updated {Answer}", Answer);
-            NavigationManager.NavigateTo(NavigateUrl());
         }
         catch (Exception ex)
         {
