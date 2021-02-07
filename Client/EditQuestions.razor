@@ -10,6 +10,7 @@
 
 @if (_question != null)
 {
+    <button type="button" class="btn btn-danger" @onclick="Delete">Delete</button>
     <table class="table table-borderless">
         <tr>
             <td>
@@ -184,6 +185,22 @@
         finally
         {
             StateHasChanged();
+        }
+    }
+
+    private async Task Delete()
+    {
+        try
+        {
+            await QuestionService.DeleteQuestionAsync(_question.QuestionId, _question.QuizID);
+            await logger.LogInformation("Question Deleted {_question}", _question);
+            _questions = await QuestionService.GetQuestionsAsync(_question.QuizID);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Deleting Answer {_question} {Error}", _question, ex.Message);
+            AddModuleMessage("Error Deleting Answer", MessageType.Error);
         }
     }
 }
