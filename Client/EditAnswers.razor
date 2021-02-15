@@ -39,30 +39,25 @@
     <button type="button" class="btn btn-success" @onclick="Add">+</button>
 }
 
-
 @code {
     [Parameter]
     public int QuestionID { get; set; }
 
+    [Parameter]
     public List<Answer> _answers { get; set; }
 
     Answer _answer;
 
-    protected override async Task OnInitializedAsync()
-    {
-        _answer = new Answer()
-        {
-            QuestionID = QuestionID,
-            Text = "Change me, please!!"
-        };
-
-        await GetAnswers();
-    }
-
-    private async Task GetAnswers()
+    public async Task GetAnswers(int QuestionID) //Вынести в едитквестчонс методы
     {
         try
         {
+            _answer = new Answer()
+            {
+                QuestionID = QuestionID,
+                Text = "Change me, please!!"
+            };
+
             _answers = await AnswerService.GetAnswersAsync(QuestionID);
 
             if (_answers == null)
@@ -89,7 +84,7 @@
             _answer = await AnswerService.AddAnswerAsync(_answer);
             await logger.LogInformation("Answer Added {_answer}", _answer);
 
-            await GetAnswers();
+            await GetAnswers(QuestionID);
         }
         catch (Exception ex)
         {

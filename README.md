@@ -1,3 +1,4 @@
+## Oqtane quiz module 
 ### Used packages
 
 - BlazorAnimation
@@ -5,7 +6,7 @@
 ---
 ### Todo
 
-- Clean code
+- Code refactoring
 - Fix returning result after quiz
 - Normalize tables
 - Change default theme

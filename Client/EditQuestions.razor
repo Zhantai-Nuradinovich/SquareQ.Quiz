@@ -4,6 +4,7 @@
 
 @inherits ModuleBase
 @inject IQuestionService QuestionService
+@inject IAnswerService AnswerService
 @inject NavigationManager NavigationManager
 
 <h4>Add a new question</h4>
@@ -35,7 +36,7 @@
             <td>
                 @if (_question.QuestionId > 0)
                 {
-                    <EditAnswers QuestionID="@_question.QuestionId" />
+                    <EditAnswers QuestionID="@_question.QuestionId" _answers="_answers" @ref="editAnswers" />
                 }
                 else
                 {
@@ -83,6 +84,9 @@
     Question _question;
     IEnumerator<Question> enumerator;
 
+    EditAnswers editAnswers;
+    public List<Answer> _answers { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         await GetItems();
@@ -111,12 +115,28 @@
             enumerator = _questions.GetEnumerator();
 
             if (enumerator.MoveNext())
+            {
                 _question = enumerator.Current;
+                await GetAnswers(_question.QuestionId);
+            }
         }
         catch (Exception ex)
         {
             await logger.LogError(ex, "Error Loading Questions {QuizId} {Error}", Id, ex.Message);
             AddModuleMessage("Error Loading QuizItems", MessageType.Error);
+        }
+    }
+
+    public async Task GetAnswers(int QuestionID) //Вынести в едитквестчонс методы
+    {
+        try
+        {
+            _answers = await AnswerService.GetAnswersAsync(QuestionID);
+        }
+        catch (Exception ex)
+        {
+            await logger.LogError(ex, "Error Loading Answers {QuestionID} {Error}", QuestionID, ex.Message);
+            AddModuleMessage("Error Loading Answers", MessageType.Error);
         }
     }
 
@@ -165,6 +185,8 @@
             if (enumerator.MoveNext())
             {
                 _question = enumerator.Current;
+                await GetAnswers(_question.QuestionId);
+                StateHasChanged();
             }
             else
             {
@@ -181,10 +203,6 @@
         {
             await logger.LogError(ex, "Error Enumerating QuizItem {Error}", ex.Message);
             AddModuleMessage("Error Enumerating QuizItem", MessageType.Error);
-        }
-        finally
-        {
-            StateHasChanged();
         }
     }
 
